@@ -1,0 +1,11 @@
+Intersector.
+
+Intersector goal is to find maximized subset of non-intersecting figures build on given points in reasonable time.
+Way it should work:
+1. Generate set of points.
+2. Choose type of figures being connected with points.
+3. Run calculation.
+4. Get a subset of non-intersecting figures, where each has center in one of generated points.
+
+Author: Maciej 'mac' Grzybek (mashester@gmail.com).
+Creation time: 05.2012.
