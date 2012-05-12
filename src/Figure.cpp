@@ -57,12 +57,12 @@ Circle::Circle(const Point& center, unsigned int radius) : Figure(center),radius
 
 double Square::getDistanceX(const Square& square) const
 {
-    return abs(this->centerPoint.x - square.centerPoint.x);
+    return std::abs(this->centerPoint.x - square.centerPoint.x);
 }
 
 double Square::getDistanceY(const Square& square) const
 {
-    return abs(this->centerPoint.y - square.centerPoint.y);
+    return std::abs(this->centerPoint.y - square.centerPoint.y);
 }
 
 
@@ -104,4 +104,14 @@ Point Point::operator-(const Point& point) const
     result.x = this->x - point.x;
     result.y = this->y - point.y;
     return result;
+}
+
+bool Point::operator<(const Point& point) const
+{
+    return this->x < point.x;
+}
+
+bool Point::operator==(const Point& point) const
+{
+    return this->x == point.x;
 }

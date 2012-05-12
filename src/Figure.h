@@ -1,7 +1,6 @@
 #ifndef _FIGURE_H_
 #define _FIGURE_H_
 
-#include <boost/optional.hpp>
 #include "FigureException.h"
 
 class Figure;
@@ -40,6 +39,8 @@ struct Point
     int x;
     int y;
     Point operator-(const Point&) const;
+    bool operator<(const Point&) const;
+    bool operator==(const Point&) const;
 };
 
 class Figure
