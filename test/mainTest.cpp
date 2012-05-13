@@ -5,54 +5,45 @@
 #include "../src/Space.h"
 #include "../src/MedianSelect.hpp"
 
-BOOST_AUTO_TEST_SUITE( Space01 )
+BOOST_AUTO_TEST_SUITE( Point01 )
 
-BOOST_AUTO_TEST_CASE( constructors_test ) 
+BOOST_AUTO_TEST_CASE( constructor_test )
 {
-    PointVector vec01;
     Point p01;
-    Point p02(1,1);
-    Point p03(2,2);
-    vec01.push_back(p01);
-    vec01.push_back(p02);
-    vec01.push_back(p03);
-
-    Space space01(vec01);
-    BOOST_CHECK_EQUAL(space01.getPointsCount(),3);
-
-    Space space02(space01);
-    BOOST_CHECK_EQUAL(space02.getPointsCount(),space01.getPointsCount());
-
-    Space *space03 = new Space(vec01);
-    Space space04(*space03);
-    delete space03;
-    BOOST_CHECK_EQUAL(space04.getPointsCount(),3); // check for cutting-off protection (copying constructor should perform deep copy, not shallow one)
-
-    Space space05(10); // should generate rare set of 10 points
-    BOOST_CHECK_EQUAL(space05.getPointsCount(),10);
+    Point p02(1,2);
+    Point p03(3,3);
+    BOOST_CHECK_EQUAL(p01.x,0);
+    BOOST_CHECK_EQUAL(p01.y,0);
+    BOOST_CHECK_EQUAL(p02.x,1);
+    BOOST_CHECK_EQUAL(p02.y,2);
+    BOOST_CHECK_EQUAL(p03.x,3);
+    BOOST_CHECK_EQUAL(p03.y,3);
 }
 
-BOOST_AUTO_TEST_CASE( neighborhood_test )
+BOOST_AUTO_TEST_CASE( operators_test )
 {
-    PointVector vec01;
     Point p01;
-    Point p02(1,1);
-    Point p03(2,2);
-    vec01.push_back(p01);
-    vec01.push_back(p02);
-    vec01.push_back(p03);
-    Space space01(vec01);
-    PointPairVector neighborhood_01 = space01.pointsNeighborhood(1);
-    // what happens when vector is empty?
-    PointPair pp01(p01,p02);
-    PointPair pp01r(p02,p01);
-    PointPair pp02(p02,p03);
-    PointPair pp02r(p03,p02);
-    PointPairVector::const_iterator begin = neighborhood_01.begin();
-    PointPairVector::const_iterator end = neighborhood_01.end();
-    BOOST_CHECK( (std::find(begin,end,pp01) != end) ^ (std::find(begin,end,pp01r) != end) ); // there should be found as d-neighborhood pair of p01 and p02, does not matter in what order
-    BOOST_CHECK( (std::find(begin,end,pp02) != end) ^ (std::find(begin,end,pp02r) != end) ); // the same with p02 and p03
-    BOOST_CHECK_EQUAL(neighborhood_01.size(),2); // there should be only 2 pairs found, so if two above tests pass and this fails, that means there are found more points than should be
+    Point p02;
+    Point p03(1,1);
+    Point p04(2,1);
+    Point p05(1,0);
+    Point p06(0,1);
+    //operator==
+    BOOST_CHECK_EQUAL(p01 == p02, true);
+    BOOST_CHECK_EQUAL(p01 == p03, false);
+    //operator<
+    BOOST_CHECK_EQUAL(p02<p03, true);
+    BOOST_CHECK_EQUAL(p01<p01, false);
+    BOOST_CHECK_EQUAL(p05<p03, false); // only x values are compared!
+    //operator-
+    Point subtraction04_03 = p04-p03;
+    BOOST_CHECK_EQUAL(subtraction04_03.x, 1);
+    BOOST_CHECK_EQUAL(subtraction04_03.y, 0);
+    //distanceTo
+    BOOST_CHECK_EQUAL(p06.distanceTo(p04),2);
+    BOOST_CHECK_EQUAL(p03.distanceTo(p05),1);
+    BOOST_CHECK_EQUAL(p01.distanceTo(p01),0);
+    BOOST_CHECK_EQUAL(p02.distanceTo(p01),0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -113,4 +104,55 @@ BOOST_AUTO_TEST_CASE( selection_test )
 
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE( Space01 )
+
+BOOST_AUTO_TEST_CASE( constructors_test ) 
+{
+    PointVector vec01;
+    Point p01;
+    Point p02(1,1);
+    Point p03(2,2);
+    vec01.push_back(p01);
+    vec01.push_back(p02);
+    vec01.push_back(p03);
+
+    Space space01(vec01);
+    BOOST_CHECK_EQUAL(space01.getPointsCount(),3);
+
+    Space space02(space01);
+    BOOST_CHECK_EQUAL(space02.getPointsCount(),space01.getPointsCount());
+
+    Space *space03 = new Space(vec01);
+    Space space04(*space03);
+    delete space03;
+    BOOST_CHECK_EQUAL(space04.getPointsCount(),3); // check for cutting-off protection (copying constructor should perform deep copy, not shallow one)
+
+    Space space05(10); // should generate rare set of 10 points
+    BOOST_CHECK_EQUAL(space05.getPointsCount(),10);
+}
+
+BOOST_AUTO_TEST_CASE( neighborhood_test )
+{
+    PointVector vec01;
+    Point p01;
+    Point p02(1,1);
+    Point p03(2,2);
+    vec01.push_back(p01);
+    vec01.push_back(p02);
+    vec01.push_back(p03);
+    Space space01(vec01);
+    PointPairVector neighborhood_01 = space01.pointsNeighborhood(1);
+    // what happens when vector is empty?
+    PointPair pp01(p01,p02);
+    PointPair pp01r(p02,p01);
+    PointPair pp02(p02,p03);
+    PointPair pp02r(p03,p02);
+    PointPairVector::const_iterator begin = neighborhood_01.begin();
+    PointPairVector::const_iterator end = neighborhood_01.end();
+    BOOST_CHECK( (std::find(begin,end,pp01) != end) ^ (std::find(begin,end,pp01r) != end) ); // there should be found as d-neighborhood pair of p01 and p02, does not matter in what order
+    BOOST_CHECK( (std::find(begin,end,pp02) != end) ^ (std::find(begin,end,pp02r) != end) ); // the same with p02 and p03
+    BOOST_CHECK_EQUAL(neighborhood_01.size(),2); // there should be only 2 pairs found, so if two above tests pass and this fails, that means there are found more points than should be
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
