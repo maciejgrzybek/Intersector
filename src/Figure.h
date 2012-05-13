@@ -36,6 +36,8 @@ private:
 
 struct Point
 {
+    Point();
+    Point(int x, int y);
     int x;
     int y;
     Point operator-(const Point&) const;

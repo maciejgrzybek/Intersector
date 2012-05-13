@@ -98,6 +98,12 @@ bool Circle::intersects(const Figure& figure) const
     return figure.accept(circleVisitor);
 }
 
+Point::Point() : x(0), y(0)
+{}
+
+Point::Point(int x, int y) : x(x), y(y)
+{}
+
 Point Point::operator-(const Point& point) const
 {
     Point result;
