@@ -14,21 +14,24 @@ public:
     /**
      * Method finds k-th element in points vector.
      * @param unsigned int k
-     * @param const PointVector& vector of points to look in. Default is main PointVector
+     * @param TVector::iterator iterator to the begining of range of vector to manipulate on
+     * @param TVector::iterator iterator to the end of range of vector to manipulate on
      * @return Point found point.
      */
-    static T selectKElement(unsigned int k, TVector& vec)
+    static T selectKElement(unsigned int k, typename TVector::iterator start, typename TVector::iterator end)
     {
-        unsigned int n = vec.size();
+        unsigned int n = end-start;
         if(n<10) // for little size of problem, better solution is to sort and return k-th element
         {
+            TVector vec;
+            vec.assign(start,end);
             std::sort(vec.begin(),vec.end());
             return vec[k];
         }
 
         TVector medians(n/5);
 
-        for(unsigned int i = 0;i<vec.size()/5;++i)
+        for(unsigned int i = 0;i<(end-start)/5;++i)
         {
            medians[i] = getMedianOf5(i*5,i*5+5,medians); // find median of given range of 5 vec.
         }
@@ -38,8 +41,8 @@ public:
         TVector equal; // values equal median
         TVector upper; // values higher than median
    
-        typename TVector::const_iterator iter = vec.begin();
-        typename TVector::const_iterator endIter = vec.end();
+        typename TVector::const_iterator iter = start;
+        typename TVector::const_iterator endIter = end;
 
         for(;iter!=endIter;++iter)
         {
@@ -63,6 +66,17 @@ public:
             return median;
         else
             return selectKElement(k-lower.size()-equal.size(),upper);
+    }
+
+    /**
+     * Method finds k-th element in points vector.
+     * @param unsigned int k
+     * @param const PointVector& vector of points to look in. Default is main PointVector
+     * @return Point found point.
+     */
+    static T selectKElement(unsigned int k, TVector& vec)
+    {
+        return selectKElement(k,vec.begin(),vec.end());
     }
 private:
 
