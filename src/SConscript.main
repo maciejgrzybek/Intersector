@@ -1,0 +1,5 @@
+# vim: ft=python
+
+sourceTargets = ['main.cpp','Figure.cpp','Space.cpp']
+
+Program('Intersector',sourceTargets)
