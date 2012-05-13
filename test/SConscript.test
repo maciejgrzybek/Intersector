@@ -1,0 +1,10 @@
+# vim ft=python
+
+sourceTargets = ['../src/Figure.cpp','../src/Space.cpp','../src/MedianSelect.hpp']
+
+# Build one or more test runners.
+program = Program('test', [ sourceTargets, 'mainTest.cpp' ], LIBS=['boost_unit_test_framework'])
+# Depend on the runner to ensure that it's built before running it - Note: using abspath.
+test_alias = Alias('test', [program], program[0].abspath)
+# Simply required.  Without it, 'test' is never considered out of date.
+AlwaysBuild(test_alias)
