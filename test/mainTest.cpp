@@ -135,22 +135,23 @@ BOOST_AUTO_TEST_CASE( neighborhood_test )
 {
     PointVector vec01;
     Point p01;
-    Point p02(1,1);
-    Point p03(2,2);
+    Point p02(1,0);
+    Point p03(2,1);
+    Point p04(2,2);
     vec01.push_back(p01);
     vec01.push_back(p02);
     vec01.push_back(p03);
+    vec01.push_back(p04);
     Space space01(vec01);
     PointPairVector neighborhood_01 = space01.pointsNeighborhood(1);
     // what happens when vector is empty?
     PointPair pp01(p01,p02);
-    PointPair pp01r(p02,p01);
     PointPair pp02(p02,p03);
-    PointPair pp02r(p03,p02);
+    PointPair pp03(p03,p04);
     PointPairVector::const_iterator begin = neighborhood_01.begin();
     PointPairVector::const_iterator end = neighborhood_01.end();
-    BOOST_CHECK( (std::find(begin,end,pp01) != end) ^ (std::find(begin,end,pp01r) != end) ); // there should be found as d-neighborhood pair of p01 and p02, does not matter in what order
-    BOOST_CHECK( (std::find(begin,end,pp02) != end) ^ (std::find(begin,end,pp02r) != end) ); // the same with p02 and p03
+    BOOST_CHECK( std::find(begin,end,pp01) != end ); // there should be found as d-neighborhood pair of p01 and p02, does not matter in what order
+    BOOST_CHECK( std::find(begin,end,pp03) != end ); // the same with p03 and p04
     BOOST_CHECK_EQUAL(neighborhood_01.size(),2); // there should be only 2 pairs found, so if two above tests pass and this fails, that means there are found more points than should be
 }
 

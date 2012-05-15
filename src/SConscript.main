@@ -2,4 +2,9 @@
 
 sourceTargets = ['main.cpp','Figure.cpp','Space.cpp']
 
-Program('Intersector',sourceTargets)
+env = Environment(
+                    CCFLAGS = '-O2 -std=c++0x',
+                    LINKFLAGS = '-std=c++0x'
+                 )
+
+env.Program('Intersector',sourceTargets)
