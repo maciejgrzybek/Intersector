@@ -1,6 +1,8 @@
 #include "Figure.h"
 #include <cmath>
 
+#include <ostream>
+
 SquareVisitor::SquareVisitor(const Square& square) : square_(square)
 {}
 
@@ -121,3 +123,14 @@ bool Point::operator==(const Point& point) const
 {
     return this->x == point.x;
 }
+
+double Point::distanceTo(const Point& point) const
+{
+    return sqrt(pow((x-point.x),2) + pow((y-point.y),2));
+}
+
+std::ostream& operator<<(std::ostream& output,const Point& point)
+{
+    return output << "(" << point.x << "," << point.y << ")";
+}
+

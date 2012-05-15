@@ -3,6 +3,8 @@
 
 #include "FigureException.h"
 
+#include <ostream>
+
 class Figure;
 class Square;
 class Circle;
@@ -40,9 +42,12 @@ struct Point
     Point(int x, int y);
     int x;
     int y;
+    double distanceTo(const Point&) const;
     Point operator-(const Point&) const;
     bool operator<(const Point&) const;
     bool operator==(const Point&) const;
+
+    friend std::ostream& operator<<(std::ostream&,const Point&);
 };
 
 class Figure
