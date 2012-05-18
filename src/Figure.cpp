@@ -129,6 +129,16 @@ double Point::distanceTo(const Point& point) const
     return sqrt(pow((x-point.x),2) + pow((y-point.y),2));
 }
 
+int Point::distanceXTo(const Point& point) const
+{
+    return abs(x-point.x);
+}
+
+int Point::distanceYTo(const Point& point) const
+{
+    return abs(y-point.y);
+}
+
 std::ostream& operator<<(std::ostream& output,const Point& point)
 {
     return output << "(" << point.x << "," << point.y << ")";

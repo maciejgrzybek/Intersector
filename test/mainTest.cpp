@@ -144,6 +144,10 @@ BOOST_AUTO_TEST_CASE( neighborhood_test )
     vec01.push_back(p04);
     Space space01(vec01);
     PointPairVector neighborhood_01 = space01.pointsNeighborhood(1);
+    for(auto& i : neighborhood_01)
+    {
+        std::cout << i.first << "," << i.second << std::endl;
+    }
     // what happens when vector is empty?
     PointPair pp01(p01,p02);
     PointPair pp02(p02,p03);

@@ -43,6 +43,8 @@ struct Point
     int x;
     int y;
     double distanceTo(const Point&) const;
+    int distanceXTo(const Point&) const;
+    int distanceYTo(const Point&) const;
     Point operator-(const Point&) const;
     bool operator<(const Point&) const;
     bool operator==(const Point&) const;

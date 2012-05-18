@@ -37,126 +37,77 @@ Space::Space(const PointVector& pointVector) : points(pointVector)
 PointPairVector Space::pointsNeighborhood(unsigned int d)
 {
     std::sort(points.begin(),points.end()); // because of representation points in vector, we need sort them by x-cordinate, to be able to find d-pairs on line, after projection
-    return pointsNeighborhood(points.begin(),points.end(),d);
+    PointsContainer pc; // prepare X and Y vectors which are: points sorted by X coord and points sorted by Y coord
+    pc.x = points;
+    pc.y = points;
+    std::sort(pc.x.begin(),pc.x.end(),pc.byX); // prepare points sorted by X coordinate
+    std::sort(pc.y.begin(),pc.y.end(),pc.byY); // prepare points sorted by Y coordinate
+    return pointsNeighborhood(pc,0,static_cast<int>(pc.size()),d);
 }
 
-PointPairVector Space::bruteNeighbors(PointVector::iterator start, PointVector::iterator end, unsigned int d) const
+PointPairVector Space::pointsNeighborhood(const Space::PointsContainer& pc, int start, int end, unsigned int d)
+{
+    if(end-start<=3)
+    {
+        return bruteNeighbors(pc.x,start,end,d);
+    }
+    Point median = pc.x[pc.size()/2];
+    PointPairVector resultLeft = pointsNeighborhood(pc,start,start+(end-start)/2,d);
+    PointPairVector resultRight = pointsNeighborhood(pc,start+(end-start)/2,end,d); // TODO: check if it should be +1 in START argument
+    
+    PointVector zone = leaveFromZone(pc.y,median,d); // vector of points within +-d zone from median
+    PointPairVector zonePairs = pairsInZone(zone,d); // look throught vector and find d-pairs
+
+    resultLeft.insert(resultRight.begin(),resultRight.end());
+    resultLeft.insert(zonePairs.begin(),zonePairs.end());
+
+    return resultLeft;
+}
+
+PointVector Space::leaveFromZone(const PointVector& vec, const Point& splitPoint, unsigned int d)
+{
+    PointVector result;
+    PointVector::const_iterator iter = vec.begin();
+    PointVector::const_iterator endIter = vec.end();
+    for(;iter!=endIter;++iter)
+    {
+        if(iter->distanceXTo(splitPoint)<=d)
+            result.push_back(*iter);
+    }
+    return result;
+}
+
+PointPairVector Space::pairsInZone(const PointVector& zone, unsigned int d)
 {
     PointPairVector result;
-    PointVector::iterator i = start;
-    PointVector::iterator j = start;
-    for(;i<end;++i)
+    PointVector::const_iterator iter = zone.begin();
+    PointVector::const_iterator endIter = zone.end();
+    for(;iter!=endIter;++iter)
     {
-        for(j=i+1;j<end;++j)
+        for(unsigned int i = 1;(iter+i)!=endIter;++i)
+        {
+            if(iter->distanceTo(*(iter+i))<=d) // if distance is lower than d
+            {
+                result.insert(PointPair(*iter,*(iter+i))); // add pair of d-neighbors
+            }
+        }
+    }
+    return result;
+}
+
+PointPairVector Space::bruteNeighbors(const PointVector& vec, unsigned int start, unsigned int end, unsigned int d) const
+{
+    PointPairVector result;
+    PointVector::const_iterator i = vec.begin()+start;
+    PointVector::const_iterator j = vec.begin()+start+1;
+    PointVector::const_iterator endIter = (end>=vec.size()) ? vec.end() : vec.begin()+end+1;
+    for(;i<endIter;++i)
+    {
+        for(j=i+1;j<endIter;++j)
         {
             if(j->distanceTo(*i)<=d)
             {
                 result.insert(PointPair(*i,*j));
-            }
-        }
-    }
-    return result;
-}
-
-Space::PointdPairVector Space::bruteNeighbors(std::vector<dPoint>::iterator start, std::vector<dPoint>::iterator end, unsigned int d) const
-{
-    PointdPairVector result;
-    std::vector<dPoint>::iterator i = start;
-    std::vector<dPoint>::iterator j = start;
-    for(;i<end;++i)
-    {
-        for(j=i+1;j<end;++j)
-        {
-            if(j->distanceTo(*i)<=d)
-            {
-                result.push_back(std::make_pair(*i,*j));
-            }
-        }
-    }
-    return result;
-}
-
-PointPairVector Space::pointsNeighborhood(PointVector::iterator start, PointVector::iterator end, unsigned int d)
-{
-    PointPairVector leftResult;
-    PointPairVector rightResult;
-    PointPairVector additionalPoints;
-    if(end-start<=3)
-    {
-        return bruteNeighbors(start,end,d);
-    }
-    Point median = MedianSelect<Point>::selectKElement((end-start)/2,start,end);
-    PointVector::iterator middle = std::find(start,end,median);
-    if(middle == end) // if element not found, something is probably wrong with selectKElement() method
-        throw std::exception(); // TODO change to proper exception
-
-    leftResult = pointsNeighborhood(start,middle,d);
-    rightResult = pointsNeighborhood(middle,end,d);
-    leftResult.insert(rightResult.begin(),rightResult.end()); // append rightResult to the leftResult.
-    additionalPoints = dPairsOnLine(d,middle);
-    leftResult.insert(additionalPoints.begin(),additionalPoints.end()); // append additional points (projected onto split line)
-    return leftResult;
-}
-
-PointPairVector Space::dPairsOnLine(unsigned int d, PointVector::const_iterator iter)
-{
-    std::vector<dPoint> dPoints;
-    PointVector::const_iterator midIter = iter;
-    Point diffPoint;
-    // search the zone in d-distance from split-line
-    // on the left side
-    while(abs((diffPoint = (*midIter - *iter)).x) <= d)
-    {
-        dPoint tempPoint = *midIter;
-        //tempPoint.x = iter->x; // projection onto split line
-        tempPoint.isLeft = true;
-        dPoints.push_back(tempPoint);
-        if(midIter == points.begin())
-            break;
-        --midIter; // go to the left (sorted vector)
-    }
-
-    // on the right side
-    midIter = iter+1;
-    while(abs((diffPoint = (*midIter - *iter)).x) <= d)
-    {
-        if(midIter == points.end())
-            break;
-        dPoint tempPoint = *midIter;
-        //tempPoint.x = iter->x; // projection onto split line
-        tempPoint.isLeft = false;
-        dPoints.push_back(tempPoint);
-        ++midIter; // go to the right (sorted vector)
-    }
-
-    // calculating d-pairs on the line
-    std::sort(dPoints.begin(),dPoints.end()); // O(nlogn)
-    PointdPairVector neighbors = bruteNeighbors(dPoints.begin(),dPoints.end(),d);
-/*    std::vector<dPoint>::iterator dp_i = dPoints.begin();
-    std::vector<dPoint>::iterator dp_e = dPoints.end();
-    for(;dp_i!=dp_e && (dp_i+1)!=dp_e;++dp_i)
-    {
-        if(abs((dp_i->y) - (dp_i+1)->y) <= d) // |point1.y - point2.y| <= d - condition for d-neighborhood on the line
-        {
-            dp_i->x = dp_i->originalX;
-            (dp_i+1)->x = (dp_i+1)->originalX;
-            PointdPair pp(*dp_i,*(dp_i+1));
-            neighbors.push_back(pp);
-        }
-    }*/
-    PointdPairVector::iterator pp_i = neighbors.begin();
-    PointdPairVector::iterator pp_e = neighbors.end();
-
-    PointPairVector result;
-
-    for(;pp_i!=pp_e;++pp_i)
-    {
-        // TODO: check whether it is good condition:
-        //if((pp_i->first).isLeft ^ (pp_i->second).isLeft) // possible neighbors have to be from different sides (left and right).
-        {
-            if(pp_i->first.distanceTo(pp_i->second) <= d) // if the real distance between points are not higher than d - they are real d-neighbors
-            {
-                result.insert(PointPair(pp_i->first,pp_i->second));
             }
         }
     }
@@ -172,12 +123,4 @@ int Space::getRandomNumber(int start, int end) const
 {
     boost::random::uniform_int_distribution<> dist(start, end);
     return dist(randomGenerator);
-}
-
-Space::dPoint::dPoint(const Point& point) : Point(point.x,point.y), originalX(point.x)
-{}
-
-bool Space::dPoint::operator<(const Space::dPoint& point) const
-{
-    return y<point.y;
 }

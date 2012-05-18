@@ -113,18 +113,52 @@ public:
      */
     size_t getPointsCount() const;
 private:
-    PointVector points;
 
-    struct dPoint : public Point
+    class PointsContainer
     {
-        bool isLeft;
-        int originalX;
-        dPoint(const Point&);
-        bool operator<(const dPoint&) const;
+    public:
+        PointVector x;
+        PointVector y;
+
+        static bool byX(const Point& a, const Point& b)
+        {
+            if(a.x<b.x)
+            {
+                return true;
+            }
+            else if(a.x==b.x)
+            {
+                return a.y<b.y;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        static bool byY(const Point& a, const Point& b)
+        {
+            if(a.y<b.y)
+            {
+                return true;
+            }
+            else if(a.y==b.y)
+            {
+                return a.x<b.x;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        std::size_t size() const
+        {
+            assert(x.size() == y.size());
+            return x.size();
+        }
     };
 
-    typedef std::pair<dPoint,dPoint> PointdPair;
-    typedef std::vector<PointdPair> PointdPairVector;
+    PointVector points;
 
     /**
      * Random number generator.
@@ -146,20 +180,14 @@ private:
      * @param unsigned int d - number of distance units of neighborhood to calculate points of.
      * @return PointPairVector Vector of pair of points meeting condition.
      */
-    PointPairVector pointsNeighborhood(PointVector::iterator,PointVector::iterator,unsigned int);
+    PointPairVector pointsNeighborhood(const PointsContainer&,int,int,unsigned int);
 
-    /**
-     * Helper method for pointsNeighborhood.
-     * Method does projection of points in zone of d-distance from split line onto it and checks whether there is any d-pair (points with distance less-equal d on line (after projection) from different sides of split line (left and right) and distance before projection should not be higher than d).
-     * @param unsigned int d - distance
-     * @param PointVector::const_iterator iterator to split line in PointVector.
-     * @return PointPairVector vector of pairs of points being in d-neighborhood
-     */
-    PointPairVector dPairsOnLine(unsigned int,PointVector::const_iterator);
+PointVector leaveFromZone(const PointVector& vec, const Point& splitPoint, unsigned int d);
 
-    PointPairVector bruteNeighbors(PointVector::iterator,PointVector::iterator,unsigned int) const;
 
-    PointdPairVector bruteNeighbors(std::vector<dPoint>::iterator start, std::vector<dPoint>::iterator end, unsigned int d) const;
+PointPairVector pairsInZone(const PointVector& zone, unsigned int d);
+
+    PointPairVector bruteNeighbors(const PointVector&, unsigned int, unsigned int, unsigned int) const;
 };
 
 #endif
