@@ -11,6 +11,8 @@
 
 #include "Figure.h"
 
+class AdjacencyGraph;
+
 typedef std::vector<Point> PointVector;
 struct PointPair
 {
@@ -112,6 +114,8 @@ public:
      * @return size_t number of points in vector.
      */
     size_t getPointsCount() const;
+
+    AdjacencyGraph buildIntersectionGraph(const PointPairVector&, unsigned int);
 private:
 
     class PointsContainer

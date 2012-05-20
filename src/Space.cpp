@@ -1,5 +1,7 @@
 #include "Space.h"
 #include "MedianSelect.hpp"
+#include "FigureFactory.h"
+#include "AdjacencyGraph.h"
 
 #include <algorithm>
 #include <cmath>
@@ -124,3 +126,10 @@ int Space::getRandomNumber(int start, int end) const
     boost::random::uniform_int_distribution<> dist(start, end);
     return dist(randomGenerator);
 }
+
+// GRAPH
+AdjacencyGraph Space::buildIntersectionGraph(const PointPairVector& vec, unsigned int d)
+{
+    return AdjacencyGraph(points,vec,d);
+}
+
