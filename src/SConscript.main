@@ -1,6 +1,6 @@
 # vim: ft=python
 
-sourceTargets = ['main.cpp','Figure.cpp','Space.cpp']
+sourceTargets = ['main.cpp','Figure.cpp','Space.cpp', 'AdjacencyGraph.cpp', 'FigureFactory.h' ]
 
 env = Environment(
                     CCFLAGS = '-O2 -std=c++0x -g',

@@ -4,6 +4,7 @@
 
 #include "../src/Space.h"
 #include "../src/MedianSelect.hpp"
+#include "../src/AdjacencyGraph.h"
 
 BOOST_AUTO_TEST_SUITE( Point01 )
 
@@ -144,10 +145,6 @@ BOOST_AUTO_TEST_CASE( neighborhood_test )
     vec01.push_back(p04);
     Space space01(vec01);
     PointPairVector neighborhood_01 = space01.pointsNeighborhood(1);
-    for(auto& i : neighborhood_01)
-    {
-        std::cout << i.first << "," << i.second << std::endl;
-    }
     // what happens when vector is empty?
     PointPair pp01(p01,p02);
     PointPair pp02(p02,p03);
@@ -157,6 +154,33 @@ BOOST_AUTO_TEST_CASE( neighborhood_test )
     BOOST_CHECK( std::find(begin,end,pp01) != end ); // there should be found as d-neighborhood pair of p01 and p02, does not matter in what order
     BOOST_CHECK( std::find(begin,end,pp03) != end ); // the same with p03 and p04
     BOOST_CHECK_EQUAL(neighborhood_01.size(),2); // there should be only 2 pairs found, so if two above tests pass and this fails, that means there are found more points than should be
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE( Graph01 )
+
+BOOST_AUTO_TEST_CASE( non_intersection_subsets )
+{
+    PointVector vec01;
+    Point p01;
+    Point p02(2,0);
+    Point p03(3,0);
+    Point p04(3,1);
+    Point p05(4,2);
+    vec01.push_back(p01);
+    vec01.push_back(p02);
+    vec01.push_back(p03);
+    vec01.push_back(p04);
+    vec01.push_back(p05);
+    Space space01(vec01);
+    PointPairVector neighborhood_01 = space01.pointsNeighborhood(2);
+    AdjacencyGraph graph = space01.buildIntersectionGraph(neighborhood_01,2);
+    graph.solve();
+    PointVector points = graph.getPointVector();
+    PointVector::const_iterator begin = points.begin();
+    PointVector::const_iterator end = points.end();
+    BOOST_CHECK( std::find(begin,end,p01) != end && std::find(begin,end,p03) != end && std::find(begin,end,p05) != end );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
