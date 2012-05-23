@@ -1,10 +1,10 @@
 # vim: ft=python
 
-sourceTargets = ['main.cpp','Figure.cpp','Space.cpp', 'AdjacencyGraph.cpp', 'FigureFactory.h' ]
+sourceTargets = ['main.cpp','Figure.cpp','Space.cpp', 'AdjacencyGraph.cpp', 'FigureFactory.h', 'UI.cpp']
 
 env = Environment(
                     CCFLAGS = '-O2 -std=c++0x -g',
-                    LINKFLAGS = '-std=c++0x'
+                    LINKFLAGS = '-std=c++0x -lpthread -lboost_thread'
                  )
 
 env.Program('Intersector',sourceTargets)
