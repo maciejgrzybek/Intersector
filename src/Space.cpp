@@ -10,15 +10,15 @@
 
 boost::random::mt19937 Space::randomGenerator;
 
-Space::Space(unsigned int amount, bool rare)
+Space::Space(unsigned int amount, unsigned int size, bool rare)
 {
     if(rare)
     {
         for(unsigned int i = 0;i<amount;++i)
         {
-            /* produce points for square size 20*amount x 20*amount */
-            int x = getRandomNumber(-amount*10,amount*10);
-            int y = getRandomNumber(-amount*10,amount*10);
+            /* produce points for square size 2*size*amount x 2*size*amount */
+            int x = getRandomNumber(-amount*size,amount*size);
+            int y = getRandomNumber(-amount*size,amount*size);
             Point randomPoint(x,y);
             points.push_back(randomPoint);
         }
@@ -121,6 +121,11 @@ size_t Space::getPointsCount() const
     return points.size();
 }
 
+PointVector Space::getPointVector() const
+{
+    return points;
+}
+
 int Space::getRandomNumber(int start, int end) const
 {
     boost::random::uniform_int_distribution<> dist(start, end);
@@ -128,7 +133,7 @@ int Space::getRandomNumber(int start, int end) const
 }
 
 // GRAPH
-AdjacencyGraph Space::buildIntersectionGraph(const PointPairVector& vec, unsigned int d)
+AdjacencyGraph Space::buildIntersectionGraph(const PointPairVector& vec, unsigned int d) const
 {
     return AdjacencyGraph(points,vec,d);
 }

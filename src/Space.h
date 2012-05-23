@@ -87,9 +87,10 @@ public:
     /**
      * Constructor generates points with pseudo-random positions of given amount with rare or not (as given with second parameter) coverage.
      * @param unsigned int Number of points to generate
+     * @param unsigned int Size of space for points
      * @param bool Rare set or not
      */
-    Space(unsigned int,bool = true);
+    Space(unsigned int,unsigned int = 10,bool = true);
 
     /**
      * Copying constructor.
@@ -98,7 +99,7 @@ public:
     Space(const Space&);
 
     /**
-     * Creates space from given PointVector
+     * Creates space from given PointVector.
      */
     Space(const PointVector&);
 
@@ -115,7 +116,13 @@ public:
      */
     size_t getPointsCount() const;
 
-    AdjacencyGraph buildIntersectionGraph(const PointPairVector&, unsigned int);
+    /**
+     * Method returns PointVector stored in Space.
+     * @return PointVector points stored in Space.
+     */
+    PointVector getPointVector() const;
+
+    AdjacencyGraph buildIntersectionGraph(const PointPairVector&, unsigned int) const;
 private:
 
     class PointsContainer
