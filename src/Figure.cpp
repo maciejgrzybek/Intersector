@@ -3,6 +3,9 @@
 
 #include <ostream>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
 SquareVisitor::SquareVisitor(const Square& square) : square_(square)
 {}
 
@@ -142,5 +145,23 @@ int Point::distanceYTo(const Point& point) const
 std::ostream& operator<<(std::ostream& output,const Point& point)
 {
     return output << "(" << point.x << "," << point.y << ")";
+}
+
+std::istream& operator>>(std::istream& input, Point& point)
+{
+    std::string pointStr;
+    input >> pointStr;
+    std::vector<std::string> strs;
+    boost::split(strs, pointStr, boost::is_any_of(","));
+    try
+    {
+        point.x = boost::lexical_cast<int>(strs[0]);
+        point.y = boost::lexical_cast<int>(strs[1]);
+    }
+    catch(boost::bad_lexical_cast&)
+    {
+        input.setstate(std::ios::failbit);
+    }
+    return input;
 }
 
