@@ -8,7 +8,7 @@
 
 #include <boost/random/uniform_int_distribution.hpp>
 
-boost::random::mt19937 Space::randomGenerator;
+boost::random::mt19937 Space::randomGenerator(std::time(0));
 
 Space::Space(unsigned int amount, unsigned int size, bool rare)
 {
@@ -17,8 +17,8 @@ Space::Space(unsigned int amount, unsigned int size, bool rare)
         for(unsigned int i = 0;i<amount;++i)
         {
             /* produce points for square size 2*size*amount x 2*size*amount */
-            int x = getRandomNumber(-amount*size,amount*size);
-            int y = getRandomNumber(-amount*size,amount*size);
+            int x = getRandomNumber(0,amount*size);
+            int y = getRandomNumber(0,amount*size);
             Point randomPoint(x,y);
             points.push_back(randomPoint);
         }
