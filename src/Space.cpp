@@ -25,8 +25,45 @@ Space::Space(unsigned int amount, unsigned int size, bool rare)
     }
     else
     {
-        // FIXME: implement this
-        // Split into smaller pieces and localy in one generate not-rare points set.
+        int partChooser = getRandomNumber(0,3);
+        Point offset;
+        switch(partChooser)
+        {
+            case 0:
+                offset.x = 0;
+                offset.y = 0;
+            break;
+            case 1:
+                offset.x = amount*size/2;
+                offset.y = 0;
+            break;
+            case 2:
+                offset.x = 0;
+                offset.y = amount*size/2;
+            break;
+            case 3:
+                offset.x = amount*size/2;
+                offset.y = amount*size/2;
+            break;
+        }
+        std::cout << "part: " << partChooser << std::endl;
+        int notRareAmount = amount/4;
+        int x = getRandomNumber(0,notRareAmount*size);
+        for(unsigned int i = 0;i<notRareAmount;++i)
+        {
+            int y = getRandomNumber(0,notRareAmount*size);
+            Point randomPoint(x,y);
+            randomPoint = randomPoint + offset;
+            points.push_back(randomPoint);
+        }
+        int restAmount = amount-notRareAmount;
+        for(unsigned int i = 0;i<restAmount;++i)
+        {
+            x = getRandomNumber(notRareAmount*size,restAmount*size);
+            int y = getRandomNumber(notRareAmount*size,restAmount*size);
+            Point randomPoint(x,y);
+            points.push_back(randomPoint);
+        }
     }
 }
 
@@ -53,7 +90,7 @@ PointPairVector Space::pointsNeighborhood(const Space::PointsContainer& pc, int 
     {
         return bruteNeighbors(pc.x,start,end,d);
     }
-    Point median = pc.x[pc.size()/2];
+    Point median = pc.x[start+(end-start)/2];
     PointPairVector resultLeft = pointsNeighborhood(pc,start,start+(end-start)/2,d);
     PointPairVector resultRight = pointsNeighborhood(pc,start+(end-start)/2,end,d); // TODO: check if it should be +1 in START argument
     
@@ -88,6 +125,14 @@ PointPairVector Space::pairsInZone(const PointVector& zone, unsigned int d)
     {
         for(unsigned int i = 1;(iter+i)!=endIter;++i)
         {
+            // optimization
+            if(iter->distanceYTo(*(iter+i))>d) // if distance by Y is higher than d
+            {
+                if(iter->y < (iter+i)->y) // if current point is before second one
+                    break; // there won't be more interesting points in d-neighborhood
+                else
+                    continue; // we could not reach interesting points yet
+            }
             if(iter->distanceTo(*(iter+i))<=d) // if distance is lower than d
             {
                 result.insert(PointPair(*iter,*(iter+i))); // add pair of d-neighbors
