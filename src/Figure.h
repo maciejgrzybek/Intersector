@@ -46,6 +46,7 @@ struct Point
     int distanceXTo(const Point&) const;
     int distanceYTo(const Point&) const;
     Point operator-(const Point&) const;
+    Point operator+(const Point&) const;
     bool operator<(const Point&) const;
     bool operator==(const Point&) const;
 
@@ -65,6 +66,10 @@ public:
      */
     virtual bool intersects(const Figure&) const = 0;
     virtual double getDistance(const Figure&) const;
+    Point getCenter() const
+    {
+        return centerPoint;
+    }
 protected:
     Point centerPoint;
 };

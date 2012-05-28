@@ -75,13 +75,18 @@ Space::Space(const PointVector& pointVector) : points(pointVector)
 
 PointPairVector Space::pointsNeighborhood(unsigned int d)
 {
-    std::sort(points.begin(),points.end()); // because of representation points in vector, we need sort them by x-cordinate, to be able to find d-pairs on line, after projection
+//    std::sort(points.begin(),points.end()); // because of representation points in vector, we need sort them by x-cordinate, to be able to find d-pairs on line, after projection
     PointsContainer pc; // prepare X and Y vectors which are: points sorted by X coord and points sorted by Y coord
     pc.x = points;
     pc.y = points;
     std::sort(pc.x.begin(),pc.x.end(),pc.byX); // prepare points sorted by X coordinate
     std::sort(pc.y.begin(),pc.y.end(),pc.byY); // prepare points sorted by Y coordinate
-    return pointsNeighborhood(pc,0,static_cast<int>(pc.size()),d);
+    PointPairVector ppv = pointsNeighborhood(pc,0,static_cast<int>(pc.size()),d);
+    for(auto& pp : ppv)
+    {
+        std::cout << pp.first << " <-> " << pp.second << std::endl;
+    }
+    return ppv;
 }
 
 PointPairVector Space::pointsNeighborhood(const Space::PointsContainer& pc, int start, int end, unsigned int d)

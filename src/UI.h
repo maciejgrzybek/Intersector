@@ -11,15 +11,18 @@ public:
     UI();
     ~UI();
     PointVector getInputData();
-    void showPoints(const PointVector&);
+    void showPoints(PointVector&,PointVector&,unsigned int);
     void joinDrawerThread();
 private:
     struct Drawer
     {
-        Drawer(const PointVector&);
+        Drawer(PointVector&,PointVector&,unsigned int);
+        void display();
         void operator()();
 
-        const PointVector& vec_;
+        PointVector& vec_;
+        PointVector& points_;
+        unsigned int size_;
     };
     boost::thread drawerThread;
 };

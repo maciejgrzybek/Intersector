@@ -24,7 +24,7 @@ public:
 protected:
     typedef boost::adjacency_list<  // adjacency_list is a template depending on:
                 boost::listS,       // container for edges [std::list]
-                boost::vecS,        // container for vertices [std::vector]
+                boost::listS,        // container for vertices [std::list]
                 boost::undirectedS, // undirected edges
                 Point               // type of vertex
               > AdjGraph;

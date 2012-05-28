@@ -32,7 +32,7 @@ bool SquareVisitor::visit(const Circle&) const
 bool CircleVisitor::visit(const Circle& circle) const
 {
     double distance = circle_.getDistance(circle);
-    double allowedDistance = circle_.getRadius()/2 + circle.getRadius();
+    double allowedDistance = circle_.getRadius() + circle.getRadius();
     if(distance > allowedDistance)
     {
         return false;
@@ -117,6 +117,14 @@ Point Point::operator-(const Point& point) const
     return result;
 }
 
+Point Point::operator+(const Point& point) const
+{
+    Point result;
+    result.x = this->x + point.x;
+    result.y = this->y + point.y;
+    return result;
+}
+
 bool Point::operator<(const Point& point) const
 {
     return this->x < point.x;
@@ -125,6 +133,7 @@ bool Point::operator<(const Point& point) const
 bool Point::operator==(const Point& point) const
 {
     return this->x == point.x;
+    //return this->x == point.x && this->y == point.y;
 }
 
 double Point::distanceTo(const Point& point) const

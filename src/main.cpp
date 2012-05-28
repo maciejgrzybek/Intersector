@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <ctime>
 
+#include <GL/gl.h>
+#include <GL/glut.h>
 #include <boost/lexical_cast.hpp>
 
 #include "Figure.h"
@@ -23,40 +25,61 @@ FigureFactory* getFigureFactory()
         return &(SquareFactory::getInstance());
 }
 
-PointVector calculate(Space& s, unsigned int d)
+struct CalcThread
 {
-    AdjacencyGraph graph = s.buildIntersectionGraph(s.pointsNeighborhood(2*d),d); // create graph of intersecting circles of radius d
-    graph.solve();
-    return graph.getPointVector();
+    CalcThread(const AdjacencyGraph& adj, PointVector* vec, unsigned int size) : graph(adj), result(vec)
+    {}
+    void operator()()
+    {
+        std::cout << "punkty:" << std::endl;
+        PointVector points = graph.getPointVector();
+        for(auto& p : points)
+        {
+            std::cout << p << " ";
+        }
+        std::cout << std::endl;
+        graph.solve();
+        std::cout << "Problem solved." << std::endl;
+        for(auto& p : *result)
+        {
+            std::cout << p << " ";
+        }
+        std::cout << std::endl;
+        *result = graph.getPointVector(); // ugly solvation of drawing problem
+        // FIXME: should be right mutexed!!!
+        for(auto& p : *result)
+        {
+            std::cout << p << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "Reseted canvas feeder" << std::endl;
+    }
+    AdjacencyGraph graph;
+    PointVector* result;
+};
+
+CalcThread calculate(Space& s, unsigned int d)
+{
+//    AdjacencyGraph graph = s.buildIntersectionGraph(s.pointsNeighborhood(2*d),d); // create graph of intersecting circles of radius d
+//    CalcThread ct(graph);
+//    boost::thread thread = boost::thread(ct);
+//    return ct;
 }
 
 int main(int argc,char* argv[])
 {
-/*    Point pointA;
-    Point pointB;
-    pointA.x = 0;
-    pointA.y = 0;
-    pointB.x = 5;
-    pointB.y = 5;
-    std::vector<Figure*> vec;
-    vec.push_back(new Square(pointA,2));
-    vec.push_back(new Square(pointB,2));
-    //std::cout << vec.at(0)->intersects(*vec.at(1)) << std::endl;
-    std::vector<Point> v;
-    for(int i = 0;i<atoi(argv[1]);++i)
-        v.push_back(Point(i,i));
+    /* glut initialization before UI instantiation */
+	glutInit(&argc,argv);
+	glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
+	glutInitWindowSize (800, 600);
+	glutInitWindowPosition (400, 100);
+	glutCreateWindow ("Intersector");
 
-    Space s(v);
-    Point::counter = 0;
-    std::cout << Point::counter << std::endl;
-    PointPairVector neighborhood = s.pointsNeighborhood(atoi(argv[2]));
-    std::cout << Point::counter << std::endl;
-    return 0;*/
     UI ui;
     PointVector input;
     PointVector result;
     unsigned int size = 1;
-    if(argc < 5)
+    if(argc < 3)
     {
         std::cout << "Usage: " << argv[0] << " figure size mode [parameters]" << std::endl;
         std::cout << "Where figure can be: circle or square." << std::endl;
@@ -88,33 +111,38 @@ int main(int argc,char* argv[])
             std::cout << "Wrong size format." << std::endl;
             return 1;
         }
-        if(argv[3] == "0")
+
+        if(boost::lexical_cast<std::string>(argv[3]) == "0")
         {
             std::cout << "You have chosen mode with reading data from input. After you put data, type return (new-line character)." << std::endl;
             std::cout << "Calculations will start as soon as you finish input." << std::endl;
-            unsigned int d = 1;
-            try
-            {
-                d = boost::lexical_cast<unsigned int>(argv[4]);
-            }
-            catch(boost::bad_lexical_cast&)
-            {
-                std::cout << "Wrong format for size of figure." << std::endl;
-                return 1;
-            }
             input = ui.getInputData();
+            std::cout << "wczytano wszystkie dane" << std::endl;
             Space s(input);
-            ui.showPoints(s.getPointVector());
-            calculate(s,d);
 
+            PointVector toDraw = s.getPointVector();
+            for(auto& p : input)
+            {
+                std::cout << p << " ";
+            }
+            std::cout << std::endl;
+     int d = size;
+            AdjacencyGraph graph = s.buildIntersectionGraph(s.pointsNeighborhood(2*d),d); // create graph of intersecting circles of radius d
+            PointVector resultPoints;
+            CalcThread ct(graph,&resultPoints,size);
+            std::cout << "Calculating..." << std::endl;
+            //boost::thread thread = boost::thread(ct);
+            ct();
+            std::cout << "Rendering..." << std::endl;
+            ui.showPoints(toDraw,resultPoints,size);
+            std::cout << "Finished rendering." << std::endl; // never appears
         }
-        else if((argv[3] == "1") || (argv[3] == "2"))
+        else if((boost::lexical_cast<std::string>(argv[3]) == "1") || (argv[3] == "2")) // FIXME (lexical_cast on argv[3] == "2")
         {
             std::cout << "You have chosen random generation of data." << std::endl;
             unsigned int n = 1;
             unsigned int d = 1;
             bool rare = false;
-            bool timeMeasurement = false;
             try
             {
                 n = boost::lexical_cast<unsigned int>(argv[4]);
@@ -142,25 +170,34 @@ int main(int argc,char* argv[])
                 std::cout << "Accepting values for rare modifier are only: 0 or 1." << std::endl;
                 return 1;
             }
-            if(argv[3] == "2")
-                timeMeasurement = true;
 
             clock_t startTime;
             clock_t afterGenerationTime;
             clock_t endTime;
+            PointVector resultPoints;
             startTime = clock();
             Space s(n,d,rare);
             afterGenerationTime = clock();
             input = s.getPointVector();
-            ui.showPoints(input); // in new thread
-            result = calculate(s,d);
+            for(auto& p : input)
+            {
+                std::cout << p << " ";
+            }
+            std::cout << std::endl;
+            AdjacencyGraph graph = s.buildIntersectionGraph(s.pointsNeighborhood(2*d),d); // create graph of intersecting circles of radius d
+            CalcThread ct(graph,&resultPoints,size);
+            //boost::thread thread = boost::thread(ct);
+            ct();
             endTime = clock();
-            ui.showPoints(result);
             std::cout << "Generation time: " << afterGenerationTime - startTime << std::endl;
             std::cout << "Calculation time: " << endTime - afterGenerationTime << std::endl;
             std::cout << "Whole time: " << endTime - startTime << std::endl;
+            if(boost::lexical_cast<std::string>(argv[3]) == "1")
+                ui.showPoints(input,resultPoints,size);
         }
     }
-    ui.joinDrawerThread();
+//    ui.joinDrawerThread();
+
+    //sleep(3);
     return 0;
 }
