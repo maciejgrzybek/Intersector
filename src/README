@@ -1,0 +1,12 @@
+Pliki źródłowe:
+
+
+AdjacencyGraph.cpp - implementacja operacji na grafie incydencji; realizuje sortowanie grafu wg incydencji oraz usuwanie wierzchołków wg kolejności wyznaczonej przez incydencji wierzchołków;
+
+Figure.cpp - implementacja rozpoznawania przecięcia figur przy użyciu wzorca wizytator do realizacji wielometod;
+
+FigureFactory.h - implementacja fabryki figur na podstawie punktów. Wykorzystano wzorzec fabryka abstrakcyjna oraz singleton;
+
+MedianSelect.hpp - template'owa klasy do wyznaczania mediany wg algorytmu magicznych piątek. W obecnej wersji projektu nieużywana;
+
+Space.cpp - implementacja przestrzeni (kontener punktów) wraz z realizacją d-sąsiedztwa.
