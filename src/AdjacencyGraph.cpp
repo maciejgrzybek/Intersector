@@ -4,7 +4,7 @@
 
 #include <queue>
 
-AdjacencyGraph::AdjacencyGraph(const PointVector& pointVec, const PointPairVector& pairVec, unsigned int d)
+AdjacencyGraph::AdjacencyGraph(const PointVector& pointVec, const PointPairVector& pairVec, unsigned int d, FigureType figure)
 {
     PointVertexMap pointVertex;
     /* add points to graph */
@@ -21,14 +21,21 @@ AdjacencyGraph::AdjacencyGraph(const PointVector& pointVec, const PointPairVecto
     PointPairVector::const_iterator pairEndIter = pairVec.end();
     for(;pairIter!=pairEndIter;++pairIter)
     {
-    std::cout << "compares: " << pairIter->first << " with " << pairIter->second << std::endl;
 //        FigureFactory& factory = getFigureFactory();
-        FigureFactory& factory = CircleFactory::getInstance();
-        FigurePtr a = factory.getFigure(pairIter->first,d);
-        FigurePtr b = factory.getFigure(pairIter->second,d);
+        FigurePtr a;
+        FigurePtr b;
+        if(figure == CIRCLE)
+        {
+            a = CircleFactory::getInstance().getFigure(pairIter->first,d);
+            b = CircleFactory::getInstance().getFigure(pairIter->second,d);
+        }
+        else
+        {
+            a = SquareFactory::getInstance().getFigure(pairIter->first,d);
+            b = SquareFactory::getInstance().getFigure(pairIter->second,d);
+        }
         if(a->intersects(*b))
         {
-            std::cout << a->getCenter() << " vs " << b->getCenter() << std::endl;
             EdgeID edge;
             bool ok;
             boost::tie(edge,ok) = boost::add_edge(pointVertex[pairIter->first],pointVertex[pairIter->second],graph);
@@ -40,41 +47,83 @@ AdjacencyGraph::AdjacencyGraph(const PointVector& pointVec, const PointPairVecto
     }
 }
 
-void AdjacencyGraph::solve()
+/*void(std::set& c,std::vector<VertexID>& inv)
+{
+    std::vector<VertexID>::iterator inv = inv.begin();
+    std::vector<VertexID>::iterator invEnd = inv.end();
+    for(;inv != invEnd; ++inv)
+    {
+        AdjGraph::adjacency_iterator neighbourIt, neighbourEnd;
+        boost::tie(neighbourIt, neighbourEnd) = boost::adjacent_vertices(*inv,graph);
+        for(;neighbourIt != neighbourEnd; ++neighbourIt)
+        {
+            
+        }
+    }
+}*/
+
+void AdjacencyGraph::solve(bool state)
 {
     VertexComparator vc(*this);
     std::priority_queue<VertexID, std::vector<VertexID>, VertexComparator> Q(vc);
+    //std::vector<VertexID> Q;
     boost::graph_traits<AdjGraph>::vertex_iterator vi, vi_end;
     boost::tie(vi,vi_end) = boost::vertices(graph);
     for(;vi!=vi_end;++vi)
     {
-        std::cout << graph[*vi] << std::endl;
+//        Q.push_back(*vi);
         Q.push(*vi);
     }
+//    std::sort(Q.begin(),Q.end(),vc);
     // now pop'ing from priority_queue will give vertexes by amount of adjacencies (from the highest to the lowest)
     VertexID current = Q.top();
     while(!Q.empty() && adjacencesCount(current)>0)
     {
-    std::cout << "current: " << graph[current] << "(" << adjacencesCount(current) << ")" << std::endl;
-    boost::graph_traits<AdjGraph>::edge_iterator ei, ei_end;
-    boost::tie(ei,ei_end) = boost::edges(graph);
-    std::cout << "edges:" << std::endl;
-    for(;ei != ei_end;++ei)
-    {
-        std::cout << graph[boost::source(*ei,graph)] << "->" << graph[boost::target(*ei,graph)] << std::endl;
-    }
         boost::clear_vertex(current,graph);
         boost::remove_vertex(current,graph);
-    boost::tie(ei,ei_end) = boost::edges(graph);
-    std::cout << "AFTER:edges:" << std::endl;
-    for(;ei != ei_end;++ei)
-    {
-        std::cout << graph[boost::source(*ei,graph)] << "->" << graph[boost::target(*ei,graph)] << std::endl;
-    }
         Q.pop();
         current = Q.top();
     }
-    std::cout << "is empty: " << Q.empty() << " current: " << graph[current] << "("<<adjacencesCount(current)<<")" << std::endl;
+    if(state)
+    {
+        boost::graph_traits<AdjGraph>::edge_iterator ei, ei_end;
+        boost::tie(ei,ei_end) = boost::edges(graph);
+        do
+        {
+            std::priority_queue<VertexID, std::vector<VertexID>, VertexComparator> q(vc);
+            while(!Q.empty())
+            {
+                q.push(Q.top());
+                Q.pop();
+            }
+
+            VertexID curr = q.top();
+            while(!q.empty() && adjacencesCount(curr)>0)
+            {
+                boost::clear_vertex(curr,graph);
+                boost::remove_vertex(curr,graph);
+                q.pop();
+                curr = q.top();
+            }
+/*            for(;ei != ei_end;++ei)
+            {
+                current = boost::source(*ei,graph);
+                std::cout << graph[current] << std::endl;
+                boost::clear_vertex(current,graph);
+                boost::remove_vertex(current,graph);
+                break;
+            }//break;*/
+            boost::tie(ei,ei_end) = boost::edges(graph);
+            if(ei != ei_end)
+            {
+                while(!q.empty())
+                {
+                    Q.push(q.top());
+                    q.pop();
+                }
+            }
+        } while(ei != ei_end); // if there are still some edges
+    }
 }
 
 PointVector AdjacencyGraph::getPointVector() const
@@ -101,8 +150,6 @@ AdjacencyGraph::VertexComparator::VertexComparator(AdjacencyGraph& adj) : parent
 
 bool AdjacencyGraph::VertexComparator::operator()(const VertexID& lhs, const VertexID& rhs) const
 {
-    std::cout << parent.graph[lhs] << "("<< parent.adjacencesCount(lhs) <<")" << "vs" << parent.graph[rhs] << "(" << parent.adjacencesCount(rhs) << ") ";
     bool result = parent.adjacencesCount(lhs)<=parent.adjacencesCount(rhs); // unfortunatelly linear complexity
-    std::cout << "= " << result << std::endl; 
     return result;
 }

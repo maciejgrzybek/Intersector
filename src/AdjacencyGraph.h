@@ -15,9 +15,9 @@ public:
      * @param const PointPairVector& Reference to PointPairVector to graph be build from.
      * @param unsigned int Size of figure.
      */
-    AdjacencyGraph(const PointVector&,const PointPairVector&, unsigned int);
+    AdjacencyGraph(const PointVector&,const PointPairVector&, unsigned int, FigureType);
 
-    void solve();
+    void solve(bool = true);
 
     PointVector getPointVector() const;
 

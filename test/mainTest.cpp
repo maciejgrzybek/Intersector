@@ -117,13 +117,13 @@ BOOST_AUTO_TEST_CASE( constructors_test )
     vec01.push_back(p02);
     vec01.push_back(p03);
 
-    Space space01(vec01);
+    Space space01(vec01,CIRCLE);
     BOOST_CHECK_EQUAL(space01.getPointsCount(),3);
 
     Space space02(space01);
     BOOST_CHECK_EQUAL(space02.getPointsCount(),space01.getPointsCount());
 
-    Space *space03 = new Space(vec01);
+    Space *space03 = new Space(vec01,CIRCLE);
     Space space04(*space03);
     delete space03;
     BOOST_CHECK_EQUAL(space04.getPointsCount(),3); // check for cutting-off protection (copying constructor should perform deep copy, not shallow one)
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE( neighborhood_test )
     vec01.push_back(p02);
     vec01.push_back(p03);
     vec01.push_back(p04);
-    Space space01(vec01);
+    Space space01(vec01,CIRCLE);
     PointPairVector neighborhood_01 = space01.pointsNeighborhood(1);
     // what happens when vector is empty?
     PointPair pp01(p01,p02);
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE( non_intersection_subsets )
     vec01.push_back(p03);
     vec01.push_back(p04);
     vec01.push_back(p05);
-    Space space01(vec01);
+    Space space01(vec01,CIRCLE);
     PointPairVector neighborhood_01 = space01.pointsNeighborhood(2);
     AdjacencyGraph graph = space01.buildIntersectionGraph(neighborhood_01,2);
     graph.solve();

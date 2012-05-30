@@ -10,7 +10,7 @@
 
 boost::random::mt19937 Space::randomGenerator(std::time(0));
 
-Space::Space(unsigned int amount, unsigned int size, bool rare)
+Space::Space(unsigned int amount, unsigned int size, bool rare, FigureType figure) : figure_(figure)
 {
     if(rare)
     {
@@ -46,7 +46,6 @@ Space::Space(unsigned int amount, unsigned int size, bool rare)
                 offset.y = amount*size/2;
             break;
         }
-        std::cout << "part: " << partChooser << std::endl;
         int notRareAmount = amount/4;
         int x = getRandomNumber(0,notRareAmount*size);
         for(unsigned int i = 0;i<notRareAmount;++i)
@@ -67,10 +66,10 @@ Space::Space(unsigned int amount, unsigned int size, bool rare)
     }
 }
 
-Space::Space(const Space& spaceToCopy) : points(spaceToCopy.points)
+Space::Space(const Space& spaceToCopy) : points(spaceToCopy.points), figure_(spaceToCopy.figure_)
 {}
 
-Space::Space(const PointVector& pointVector) : points(pointVector)
+Space::Space(const PointVector& pointVector, FigureType figure) : points(pointVector), figure_(figure)
 {}
 
 PointPairVector Space::pointsNeighborhood(unsigned int d)
@@ -82,10 +81,6 @@ PointPairVector Space::pointsNeighborhood(unsigned int d)
     std::sort(pc.x.begin(),pc.x.end(),pc.byX); // prepare points sorted by X coordinate
     std::sort(pc.y.begin(),pc.y.end(),pc.byY); // prepare points sorted by Y coordinate
     PointPairVector ppv = pointsNeighborhood(pc,0,static_cast<int>(pc.size()),d);
-    for(auto& pp : ppv)
-    {
-        std::cout << pp.first << " <-> " << pp.second << std::endl;
-    }
     return ppv;
 }
 
@@ -185,6 +180,6 @@ int Space::getRandomNumber(int start, int end) const
 // GRAPH
 AdjacencyGraph Space::buildIntersectionGraph(const PointPairVector& vec, unsigned int d) const
 {
-    return AdjacencyGraph(points,vec,d);
+    return AdjacencyGraph(points,vec,d,figure_);
 }
 

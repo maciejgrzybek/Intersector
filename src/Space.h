@@ -90,7 +90,7 @@ public:
      * @param unsigned int Size of space for points
      * @param bool Rare set or not
      */
-    Space(unsigned int,unsigned int = 10,bool = true);
+    Space(unsigned int,unsigned int = 10,bool = true, FigureType = CIRCLE);
 
     /**
      * Copying constructor.
@@ -101,7 +101,7 @@ public:
     /**
      * Creates space from given PointVector.
      */
-    Space(const PointVector&);
+    Space(const PointVector&, FigureType);
 
     /**
      * Method retrieves points from neighborhood of d-distance units.
@@ -168,8 +168,8 @@ private:
             return x.size();
         }
     };
-
     PointVector points;
+    FigureType figure_;
 
     /**
      * Random number generator.

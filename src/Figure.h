@@ -9,6 +9,8 @@ class Figure;
 class Square;
 class Circle;
 
+enum FigureType { CIRCLE, SQUARE };
+
 class IntersectVisitor
 {
 public:

@@ -29,12 +29,15 @@ PointVector UI::getInputData()
 {
     Point point;
     PointVector vec;
+    int i = 0;
     while(!std::cin.eof())
     {
+        ++i;
         std::cin >> point;
         vec.push_back(point);
     }
-    vec.erase(--vec.end());
+    if(i>0)
+        vec.erase(--vec.end());
     return vec;
 }
 
@@ -43,20 +46,21 @@ void UI::joinDrawerThread()
     drawerThread.join();
 }
 
-void UI::showPoints(PointVector& points,PointVector& vec,unsigned int size)
+void UI::showPoints(PointVector& points,PointVector& vec,unsigned int size,FigureType figure)
 {
-    Drawer d(points,vec,size);
+    Drawer d(points,vec,size,figure);
     //drawerThread = boost::thread(d);
     d();
 }
 
-UI::Drawer::Drawer(PointVector& points, PointVector& vec, unsigned int size) : points_(points),vec_(vec),size_(size)
+UI::Drawer::Drawer(PointVector& points, PointVector& vec, unsigned int size, FigureType figure) : points_(points),vec_(vec),size_(size),figure_(figure)
 {}
 
 const float DEG2RAD = 3.14159/180;
 
 void drawCircle(unsigned int x, unsigned int y, unsigned int radius)
 {
+
    glPushMatrix();
 
    glTranslatef((float)(x),(float)(y),0.0);
@@ -69,6 +73,36 @@ void drawCircle(unsigned int x, unsigned int y, unsigned int radius)
     glEnd();
 
    glPopMatrix();
+}
+
+void drawSquare(unsigned int x, unsigned int y, unsigned int length)
+{
+    glPushMatrix();
+
+    glTranslatef((float)(x-length/2.0),(float)(y-length/2.0),0.0);
+    glBegin(GL_LINE_LOOP);
+        glVertex2i(0,0);
+        glVertex2i(length,0);
+        glVertex2i(length,length);
+        glVertex2i(0,length);
+    glEnd();
+
+    glPopMatrix();
+}
+
+void UI::Drawer::drawFigure(unsigned int x, unsigned int y, unsigned int a)
+{
+    switch(figure_)
+    {
+        case SQUARE:
+            return drawSquare(x,y,a);
+        break;
+        case CIRCLE:
+            return drawCircle(x,y,a);
+        break;
+        default:
+            exit(1);
+    }
 }
 
 void UI::Drawer::display()
@@ -86,14 +120,7 @@ void UI::Drawer::display()
         //std::cout << "vec::rysuje " << *iter << " ";
         int x = iter->x; // FIXME should be scaled and translated to right position
         int y = iter->y; // FIXME
-        /*glPushMatrix();
-            glColor3f(1.0, 0.0, 0.0);
-            glVertex2i(x,y);
-        glPopMatrix();*/
-        drawCircle(x,y,size_);
-        //std::cout << "z " << *iter << std::endl; // FIXME remove this
-        //glFlush(); // FIXME remove this
-        //sleep(1);
+        drawFigure(x,y,size_);
 
         PointVector::iterator findIter = my_find(points_.begin(),points_.end(),*iter);
         if(findIter != points_.end())
@@ -108,7 +135,7 @@ void UI::Drawer::display()
         int x = iter->x; // FIXME should be scaled and translated to right position
         int y = iter->y; // FIXME
         //glVertex2i(x,y);
-        drawCircle(x,y,size_);
+        drawFigure(x,y,size_);
         //std::cout << "n " << *iter << std::endl; // FIXME remove this
         //glFlush(); // FIXME remove this
         //sleep(1);
